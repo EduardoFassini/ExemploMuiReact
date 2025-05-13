@@ -16,23 +16,29 @@ export default function Home() {
   // const error = null;
 
   useEffect(() => {
-    function buscaJSON() {
-      const users = JSON.parse(storageUsers);
+
+    function buscaJSON(JSONUsers) {
+      const users = JSON.parse(JSONUsers);
       setUsers(users);
       setLoading(false);
     }
-
-    const storageUsers = localStorage.getItem("users");
-    if (storageUsers) { buscaJSON()
-    } else {
-      const execUsers = async () => {
+    
+    async function buscaAPI() {
+      try {
         const response = await getUsers();
-        localStorage.setItem("users", JSON.stringify(response.data.results));
-        setUsers(response.data.results);
+        const results = response.data.results;
+        localStorage.setItem("users", JSON.stringify(results));
+        setUsers(results);
         setLoading(false);
-      };
-      execUsers();
+      } catch (err) {
+        console.error("Error fetching users from API:", err); 
+        setLoading(false);
+      }
     }
+
+    const storageUsers = localStorage.getItem("users"); 
+    storageUsers ? buscaJSON(storageUsers) : buscaAPI();
+    
   }, []);
 
   if (loading) {
