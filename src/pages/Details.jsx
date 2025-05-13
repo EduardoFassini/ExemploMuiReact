@@ -15,6 +15,35 @@ L.Icon.Default.mergeOptions({
 
 export default function Details() {
 
+    const[loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const { email } = useParams();
+
+    useEffect(() => {
+        const storageUsers = localStorage.getItem('users');
+        if (storageUsers) {
+            
+            const users = JSON.parse(storageUsers);
+            const foundUser = users.find((user) => user.email == email);
+            if (foundUser) {
+                setUser(foundUser);
+                setLoading(false);
+            } else {
+                setError('Email não encontrado');
+                setLoading(false);
+            }
+
+        }else{
+
+            setError('Usuário não encontrado');
+            setLoading(false);
+            return;
+
+        }
+    },[email])
+
     if (loading) {
         return (
             <Box
