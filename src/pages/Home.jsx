@@ -6,23 +6,38 @@ import {
   CircularProgress,
   Grid,
   Box,
+  Button,
 } from "@mui/material";
 import { getUsers } from "../api/users";
-
 
 export default function Home() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   // const error = null;
 
-  useEffect(() => {
+  function reloadUsers() {
+    setLoading(true);
+    localStorage.removeItem("users");
+    getUsers()
+      .then((response) => {
+        const results = response.data.results;
+        localStorage.setItem("users", JSON.stringify(results));
+        setUsers(results);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching users from API:", err);
+        setLoading(false);
+      });
+  }
 
+  useEffect(() => {
     function buscaJSON(JSONUsers) {
       const users = JSON.parse(JSONUsers);
       setUsers(users);
       setLoading(false);
     }
-    
+
     async function buscaAPI() {
       try {
         const response = await getUsers();
@@ -31,14 +46,13 @@ export default function Home() {
         setUsers(results);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching users from API:", err); 
+        console.error("Error fetching users from API:", err);
         setLoading(false);
       }
     }
 
-    const storageUsers = localStorage.getItem("users"); 
+    const storageUsers = localStorage.getItem("users");
     storageUsers ? buscaJSON(storageUsers) : buscaAPI();
-    
   }, []);
 
   if (loading) {
@@ -57,9 +71,19 @@ export default function Home() {
   return (
     <Box sx={{ minWidth: "100vw", display: "flex", flexDirection: "column" }}>
       <Box>
-        <Typography variant="h3" component="h1" fontWeight="bold">
-          Bem-vindo à Lista de Usuários
-        </Typography>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography variant="h3" component="h1" fontWeight="bold">
+            Bem-vindo à Lista de Usuários
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={reloadUsers} // This will call the function you implement later
+            sx={{ mr: 10 }}
+          >
+            Recarregar Usuários
+          </Button>
+        </Box>
         <Typography variant="subtitle1" mt={1}>
           Explore os detalhes dos usuários cadastrados
         </Typography>
